@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="favicon.png" />
+    <title>Dicoding Story App</title>
+
+    <!-- Skip Link Styles -->
+    <style>
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #000;
+        color: #fff;
+        padding: 8px;
+        z-index: 100;
+        transition: top 0.3s;
+      }
+
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* Basic styles for navigation drawer and button */
+      #drawer-button {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        z-index: 101;
+        border-radius: 4px;
+      }
+
+      #navigation-drawer {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100%;
+        background: #f8f9fa;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+        transition: left 0.3s ease;
+        z-index: 100;
+        padding: 20px;
+      }
+
+      #navigation-drawer.open {
+        left: 0;
+      }
+
+      #navigation-drawer a {
+        display: block;
+        margin-bottom: 15px;
+        color: #333;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      #navigation-drawer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      integrity="sha512-mQ8J0KueV5HxkCgC6p0w2Blsu3VC7Il+m2gZYTbgZqgXfUO3VmzK7h6H7MLj6bQe8j9r0dGzU1ZczHycLFJzhw=="
+      crossorigin=""
+    />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <button id="drawer-button" aria-label="Open navigation menu">Menu</button>
+
+    <nav id="navigation-drawer" aria-label="Primary navigation">
+      <a href="#/">Home</a>
+      <a href="#/add-story">Add Story</a>
+      <a href="#/about">About</a>
+    </nav>
+
+    <div id="main-content"></div>
+    <script src="scripts/index.js" type="module"></script>
+  </body>
+</html>

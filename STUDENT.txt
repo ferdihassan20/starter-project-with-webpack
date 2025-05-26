@@ -1,0 +1,2 @@
+APP_URL=http://localhost:8080
+MAP_SERVICE_API_KEY=not_required_for_openstreetmap
