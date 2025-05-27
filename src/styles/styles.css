@@ -45,19 +45,68 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   top: -40px;
   left: 0;
-  background: #000;
-  color: #fff;
-  padding: 8px 16px;
+  background-color: #bf1722;
+  color: white;
+  padding: 8px;
   z-index: 100;
-  transition: top 0.3s;
-  border-radius: 0 0 4px 0;
-  font-weight: 600;
+  text-decoration: none;
 }
 
 .skip-link:focus {
   top: 0;
-  outline: 2px solid #fff;
+}
+
+/* View Transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+}
+
+::view-transition-old(root) {
+  animation: fade-out 0.5s ease-out forwards;
+}
+
+::view-transition-new(root) {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Focus styles */
+:focus {
+  outline: 3px solid #007bff;
   outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  .button {
+    border: 2px solid currentColor;
+  }
 }
 
 /* Navigation Drawer */
