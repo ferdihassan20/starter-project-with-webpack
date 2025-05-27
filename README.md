@@ -1,68 +1,90 @@
-# App Starter Project with Webpack
+# Story Share - Developer Journey Stories
 
-Proyek ini adalah setup dasar untuk aplikasi web yang menggunakan webpack untuk proses bundling, Babel untuk transpile JavaScript, serta mendukung proses build dan serving aplikasi.
+A web application where developers can share their coding journey stories, experiences, and moments of growth. Built with modern web technologies and featuring an interactive map to explore stories from around the world.
 
-## Table of Contents
+## Features
 
-- [Getting Started](#getting-started)
-- [Scripts](#scripts)
-- [Project Structure](#project-structure)
+- 🌐 Interactive map showing story locations worldwide
+- 📸 Photo upload with camera support
+- 🎨 Beautiful UI with smooth transitions
+- 📱 Fully responsive design
+- 🗺️ Multiple map styles (OpenStreetMap, Satellite, Dark Mode)
+- 🔒 Authentication system
+- ⚡ Real-time story updates
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- Node.js (v18 or higher)
+- NPM (v9 or higher)
+- Modern web browser with JavaScript enabled
 
-- [Node.js](https://nodejs.org/) (disarankan versi 12 atau lebih tinggi)
-- [npm](https://www.npmjs.com/) (Node package manager)
+## Installation
 
-### Installation
-
-1. Download starter project [di sini](https://raw.githubusercontent.com/dicodingacademy/a219-web-intermediate-labs/099-shared-files/starter-project-with-webpack.zip).
-2. Lakukan unzip file.
-3. Pasang seluruh dependencies dengan perintah berikut.
-   ```shell
+1. Clone or download this repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```bash
    npm install
    ```
 
-## Scripts
+## Running the Application
 
-- Build for Production:
-  ```shell
-  npm run build
-  ```
-  Script ini menjalankan webpack dalam mode production menggunakan konfigurasi `webpack.prod.js` dan menghasilkan sejumlah file build ke direktori `dist`.
+### Development Mode
+To run the application in development mode with hot reload:
+```bash
+npm run start-dev
+```
+The application will be available at `http://localhost:8080`
 
-- Start Development Server:
-  ```shell
-  npm run start-dev
-  ```
-  Script ini menjalankan server pengembangan webpack dengan fitur live reload dan mode development sesuai konfigurasi di`webpack.dev.js`.
+### Production Build
+To create a production build:
+```bash
+npm run build
+```
 
-- Serve:
-  ```shell
-  npm run serve
-  ```
-  Script ini menggunakan [`http-server`](https://www.npmjs.com/package/http-server) untuk menyajikan konten dari direktori `dist`.
+To serve the production build:
+```bash
+npm run serve
+```
+The application will be available at `http://localhost:8080`
 
 ## Project Structure
 
-Proyek starter ini dirancang agar kode tetap modular dan terorganisir.
-
-```text
-starter-project/
-├── dist/                   # Compiled files for production
-├── src/                    # Source project files
-│   ├── public/             # Public files
-│   ├── scripts/            # Source JavaScript files
-│   │   └── index.js        # Main JavaScript entry file
-│   ├── styles/             # Source CSS files
-│   │   └── styles.css      # Main CSS file
-│   └── index.html/         # Main HTML file
-├── package.json            # Project metadata and dependencies
-├── package-lock.json       # Project metadata and dependencies
-├── README.md               # Project documentation
-├── STUDENT.txt             # Student information
-├── webpack.common.js       # Webpack common configuration
-├── webpack.dev.js          # Webpack development configuration
-└── webpack.prod.js         # Webpack production configuration
 ```
+src/
+├── scripts/         # JavaScript source files
+│   ├── data/       # Data models and API integration
+│   ├── pages/      # Page components
+│   └── presenter/  # Presenters for data handling
+├── styles/         # CSS stylesheets
+└── templates/      # HTML templates
+```
+
+## Technologies Used
+
+- Webpack 5 for bundling
+- Babel for JavaScript compatibility
+- Leaflet.js for interactive maps
+- View Transition API for smooth page transitions
+- Font Awesome for icons
+
+## Browser Compatibility
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+Note: Some features like View Transitions API might not work in older browsers, but the application includes fallbacks.
+
+## API Integration
+
+This application uses the Dicoding Story API. Authentication is required for posting stories and accessing certain features.
+
+## Contributing
+
+This is a submission project and is not open for contributions.
+
+## License
+
+ISC License

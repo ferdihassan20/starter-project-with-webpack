@@ -1,13 +1,21 @@
 {
-  "name": "app-starter-project-with-webpack",
+  "name": "story-share",
   "version": "1.0.0",
-  "description": "",
+  "description": "A web application for developers to share their coding journey stories",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start-dev": "webpack serve --config webpack.dev.js",
-    "serve": "http-server dist"
+    "serve": "http-server dist",
+    "clean": "rimraf dist",
+    "build:prod": "npm run clean && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "story",
+    "developer",
+    "journey",
+    "map",
+    "dicoding"
+  ],
   "author": "YOUR_NAME <yourmail@mail.com>",
   "license": "ISC",
   "devDependencies": {
@@ -20,11 +28,19 @@
     "html-webpack-plugin": "^5.6.0",
     "http-server": "^14.1.1",
     "mini-css-extract-plugin": "^2.9.2",
+    "rimraf": "^5.0.5",
     "style-loader": "^3.3.4",
     "terser-webpack-plugin": "^5.3.14",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.2",
     "webpack-merge": "^5.10.0"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
