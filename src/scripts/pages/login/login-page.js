@@ -1,78 +1,89 @@
 import { StoryModel } from '../../data/story-model.js';
+import { LoginPresenter } from '../../presenter/login-presenter.js';
 
 export default class LoginPage {
   constructor() {
     this.model = new StoryModel();
+    this.presenter = new LoginPresenter(this.model, this);
+    this.button = null;
+    this.buttonText = null;
+    this.buttonLoader = null;
   }
 
   async render() {
     return `
-      <section class="auth-container" tabindex="0" aria-label="Login form section">
-        <div class="auth-card">
-          <h1>Login to Dicoding Story</h1>
-          <p class="auth-subtitle">Share your coding journey with the community</p>
+      <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-title">
+        <div class="modal-content">
+          <button class="modal-close" aria-label="Close login form" id="close-login">
+            <i class="fas fa-times"></i>
+          </button>
           
-          <form id="login-form" aria-label="Login form">
-            <div class="form-group">
-              <label for="email">Email Address</label>
-              <input 
-                type="email" 
-                id="email" 
-                name="email" 
-                required 
-                aria-required="true"
-                placeholder="Enter your email"
-                autocomplete="email"
-              />
+          <div class="auth-container">
+            <div class="auth-card">
+              <h1 id="login-title">Login</h1>
+              <p class="auth-subtitle">Welcome back!</p>
+              
+              <form id="login-form" aria-label="Login form">
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    aria-required="true"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    aria-required="true"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                  />
+                </div>
+
+                <button type="submit" class="auth-button">
+                  <span class="button-text">Sign In</span>
+                  <span class="button-loader" style="display: none;">Signing in...</span>
+                </button>
+              </form>
+
+              <div id="message" role="alert" aria-live="assertive"></div>
+
+              <div class="auth-links">
+                <p>Don't have an account? <a href="#/register">Create one here</a></p>
+              </div>
             </div>
-
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                name="password" 
-                required 
-                aria-required="true"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-              />
-            </div>
-
-            <button type="submit" class="auth-button">
-              <span class="button-text">Sign In</span>
-              <span class="button-loader" style="display: none;">Signing in...</span>
-            </button>
-          </form>
-
-          <div id="message" role="alert" aria-live="assertive"></div>
-
-          <div class="auth-links">
-            <p>Don't have an account? <a href="#/register">Create one here</a></p>
-            <p>Or <a href="#/guest-stories">browse stories as guest</a></p>
           </div>
         </div>
-      </section>
+      </div>
     `;
   }
 
   async afterRender() {
     // Check if user is already logged in
-    const token = this._getStoredToken();
-    if (token) {
+    if (this.presenter.checkLoginStatus()) {
       window.location.hash = '#/';
       return;
     }
 
     this._setupForm();
+    this._setupCloseButton();
   }
 
   _setupForm() {
     const form = document.getElementById('login-form');
-    const message = document.getElementById('message');
-    const button = form.querySelector('button[type="submit"]');
-    const buttonText = button.querySelector('.button-text');
-    const buttonLoader = button.querySelector('.button-loader');
+    this.button = form.querySelector('button[type="submit"]');
+    this.buttonText = this.button.querySelector('.button-text');
+    this.buttonLoader = this.button.querySelector('.button-loader');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -81,38 +92,59 @@ export default class LoginPage {
       const password = form.password.value;
 
       if (!email || !password) {
-        this._showMessage('Please fill in all fields.', 'error');
+        this.renderError('Please fill in all fields.');
         return;
       }
 
       try {
-        this._setLoading(true, button, buttonText, buttonLoader);
-        this._showMessage('', '');
-
-        const loginResult = await this.model.login(email, password);
-        
-        // Store token and user info
-        this._storeAuthData(loginResult);
-        
-        this._showMessage('Login successful! Redirecting...', 'success');
-        
-        // Redirect to home page
-        setTimeout(() => {
-          window.location.hash = '#/';
-        }, 1000);
-
+        const loginResult = await this.presenter.login(email, password);
+        await this.renderLoginSuccess(loginResult);
       } catch (error) {
-        this._showMessage('Login failed: ' + error.message, 'error');
-      } finally {
-        this._setLoading(false, button, buttonText, buttonLoader);
+        // Error already handled by presenter
       }
     });
   }
 
-  _setLoading(isLoading, button, buttonText, buttonLoader) {
-    button.disabled = isLoading;
-    buttonText.style.display = isLoading ? 'none' : 'inline';
-    buttonLoader.style.display = isLoading ? 'inline' : 'none';
+  _setupCloseButton() {
+    const closeButton = document.getElementById('close-login');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        window.location.hash = '#/';
+      });
+    }
+  }
+
+  showLoading() {
+    if (this.button && this.buttonText && this.buttonLoader) {
+      this.button.disabled = true;
+      this.buttonText.style.display = 'none';
+      this.buttonLoader.style.display = 'inline';
+    }
+  }
+
+  hideLoading() {
+    if (this.button && this.buttonText && this.buttonLoader) {
+      this.button.disabled = false;
+      this.buttonText.style.display = 'inline';
+      this.buttonLoader.style.display = 'none';
+    }
+  }
+
+  async renderLoginSuccess(loginResult) {
+    this._showMessage('Login successful! Redirecting...', 'success');
+    
+    // First store the auth data
+    this._storeAuthData(loginResult);
+    
+    // Wait a moment to ensure localStorage is updated
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Then redirect to home page
+    window.location.hash = '#/';
+  }
+
+  renderError(message) {
+    this._showMessage('Login failed: ' + message, 'error');
   }
 
   _showMessage(message, type) {
@@ -125,9 +157,5 @@ export default class LoginPage {
     localStorage.setItem('token', loginResult.token);
     localStorage.setItem('userId', loginResult.userId);
     localStorage.setItem('userName', loginResult.name);
-  }
-
-  _getStoredToken() {
-    return localStorage.getItem('token');
   }
 }

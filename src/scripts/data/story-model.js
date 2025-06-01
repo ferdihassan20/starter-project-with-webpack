@@ -4,29 +4,45 @@ const API_BASE_URL = CONFIG.BASE_URL;
 
 export class StoryModel {
   async register(name, email, password) {
-    const response = await fetch(`${API_BASE_URL}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'Register failed');
+    try {
+      const response = await fetch(`${API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Register failed');
+      }
+      return data;
+    } catch (error) {
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Gagal terhubung ke server, cek koneksi internet anda');
+      }
+      throw error;
     }
-    return data;
   }
 
   async login(email, password) {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
+    try {
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      return data.loginResult;
+    } catch (error) {
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Gagal terhubung ke server, cek koneksi internet anda');
+      }
+      throw error;
     }
-    return data.loginResult;
   }
 
   async getStories(token, page = 1, size = 10, location = 0) {
@@ -34,8 +50,12 @@ export class StoryModel {
     url.searchParams.append('page', page);
     url.searchParams.append('size', size);
     url.searchParams.append('location', location);
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
     const response = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
+      headers,
     });
     const data = await response.json();
     if (!response.ok) {

@@ -648,4 +648,62 @@ section > p {
 
 .leaflet-control-layers-base {
   padding: 4px !important;
+}
+
+/* Location Picker Styles */
+.location-picker {
+  position: relative;
+}
+
+.location-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.location-status {
+  color: var(--text-light);
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.location-picker-map {
+  height: 300px;
+  width: 100%;
+  border-radius: var(--border-radius);
+  margin-top: 1rem;
+  border: 2px solid var(--purple-medium);
+}
+
+.location-picker-map.active {
+  display: block !important;
+}
+
+.secondary-button {
+  background: var(--purple-darker);
+  color: var(--text-light);
+  border: 1px solid var(--purple-medium);
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.secondary-button:hover {
+  background: var(--purple-dark);
+  border-color: var(--purple-light);
+}
+
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button i {
+  font-size: 1.1rem;
 } 
