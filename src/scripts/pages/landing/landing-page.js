@@ -175,7 +175,7 @@ export default class LandingPage {
         registerModal.style.display = 'none';
         loginModal.style.display = 'flex';
         setTimeout(() => loginModal.classList.add('visible'), 10);
-      }, 300);
+      }, 150);
     });
 
     // Close on overlay click
@@ -234,7 +234,7 @@ export default class LandingPage {
         setTimeout(() => {
           document.getElementById('register-modal').style.display = 'none';
           document.getElementById('login-modal').style.display = 'flex';
-        }, 1500);
+        }, 300);
       } catch (error) {
         this._showMessage('register-message', error.message, 'error');
       }
@@ -283,7 +283,7 @@ export default class LandingPage {
     // Redirect after a short delay
     setTimeout(() => {
       window.location.hash = '#/';
-    }, 1000);
+    }, 150);
   }
 
   _showMessage(elementId, message, type) {

@@ -1,9 +1,11 @@
 import HomePage from '../pages/home/home-page';
 import LandingPage from '../pages/landing/landing-page';
+import BookmarkPage from '../pages/bookmark/bookmark-page';
 
 const routes = {
   '/': HomePage,
   '/landing': LandingPage,
+  '/bookmark': BookmarkPage,
 };
 
 function checkAuth(path) {

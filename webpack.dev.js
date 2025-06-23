@@ -18,7 +18,7 @@ module.exports = merge(common, {
       directory: path.resolve(__dirname, 'dist'),
     },
     open: true,
-    port: 9001,
+    port: 9002,
     client: {
       overlay: {
         errors: true,

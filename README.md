@@ -1,3 +1,5 @@
+The application is available at 'https://stellular-eclair-83fc4b.netlify.app/`
+
 # Story Share - Developer Journey Stories
 
 A web application where developers can share their coding journey stories, experiences, and moments of growth. Built with modern web technologies and featuring an interactive map to explore stories from around the world.
@@ -46,7 +48,6 @@ To serve the production build:
 ```bash
 npm run serve
 ```
-The application will be available at `http://localhost:8080`
 
 ## Project Structure
 

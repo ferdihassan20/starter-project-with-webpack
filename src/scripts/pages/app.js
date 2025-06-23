@@ -4,10 +4,17 @@ import { getActiveRoute } from '../routes/url-parser';
 class App {
   #content = null;
   #header = null;
+  #deferredPrompt = null;
 
   constructor({ content }) {
     this.#content = content;
     this.#header = document.getElementById('app-header');
+
+    // Listen for beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  // let Chrome show the prompt automatically
+  console.log('beforeinstallprompt triggered');
+});
   }
 
   async renderNav() {
@@ -28,13 +35,17 @@ class App {
         </div>
         <div class="nav-right">
           ${token ? 
-            `<a href="#" class="nav-link" id="logout-link">
+            `<a href="#/bookmark" class="nav-link">
+              <i class="fas fa-bookmark"></i> Bookmark
+            </a>
+            <a href="#" class="nav-link" id="logout-link">
               <i class="fas fa-sign-out-alt"></i> Logout
             </a>` : 
             `<a href="#/landing" class="nav-link">
               <i class="fas fa-sign-in-alt"></i> Login / Register
             </a>`
           }
+          
         </div>
       </nav>
     `;
@@ -56,23 +67,36 @@ class App {
       if (this.#header) {
         this.#header.innerHTML = await this.renderNav();
         this._setupNavListeners();
+        this._setupInstallButtonListener();
       }
 
       if (document.startViewTransition) {
         // Using View Transition API
-        const transition = document.startViewTransition(async () => {
-          const content = await page.render();
-          this.#content.innerHTML = content;
+        try {
+          const transition = document.startViewTransition(async () => {
+            const content = await page.render();
+            this.#content.innerHTML = content;
+            await page.afterRender();
+          });
+
+          // Add custom animation styles
+          transition.ready.then(() => {
+            document.documentElement.classList.add('view-transition-active');
+          });
+
+          await transition.finished;
+          document.documentElement.classList.remove('view-transition-active');
+        } catch (error) {
+          console.error('View transition error:', error);
+          // Fallback to normal rendering on error
+          this.#content.style.opacity = '0';
+          this.#content.innerHTML = await page.render();
           await page.afterRender();
-        });
-
-        // Add custom animation styles
-        transition.ready.then(() => {
-          document.documentElement.classList.add('view-transition-active');
-        });
-
-        await transition.finished;
-        document.documentElement.classList.remove('view-transition-active');
+          requestAnimationFrame(() => {
+            this.#content.style.transition = 'opacity 0.3s ease-in-out';
+            this.#content.style.opacity = '1';
+          });
+        }
       } else {
         // Fallback for browsers that don't support View Transition API
         this.#content.style.opacity = '0';
@@ -102,6 +126,13 @@ class App {
         window.location.hash = '#/landing';
       });
     }
+  }
+
+  
+  _setupInstallButtonListener() {
+  }
+
+  _showInstallButton(show) {
   }
 }
 

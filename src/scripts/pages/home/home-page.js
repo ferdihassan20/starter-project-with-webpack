@@ -1,5 +1,7 @@
 import { StoryModel } from '../../data/story-model.js';
 import { StoryPresenter } from '../../presenter/story-presenter.js';
+import { addBookmark } from '../../utils/indexeddb.js';
+import { subscribeUserToPush } from '../../utils/push-helper.js';
 import '../../../styles/home.css';
 
 export default class HomePage {
@@ -19,8 +21,8 @@ export default class HomePage {
       link.rel = 'stylesheet';
       link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
       document.head.appendChild(link);
-    }
   }
+}
 
   _getToken() {
     return localStorage.getItem('token');
@@ -141,6 +143,13 @@ export default class HomePage {
     // Since we already checked token in render(), just load content
     await this.loadStories();
     this._setupAddStoryForm();
+
+    // Subscribe user to push notifications after render if supported and token available
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      if (this.token) {
+        subscribeUserToPush(this.token).catch(console.error);
+      }
+    }
   }
 
   async loadStories() {
@@ -339,6 +348,14 @@ export default class HomePage {
       }
     });
 
+    // Push notification subscription setup
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      const token = this.token;
+      if (token) {
+        subscribeUserToPush(token).catch(console.error);
+      }
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -400,6 +417,13 @@ export default class HomePage {
         // Show success message
         this._showMessage('Story shared successfully!', 'success');
         
+        // Trigger push notification after successful story creation
+        this._sendPushNotification({
+          title: 'Story Published',
+          body: 'Your story has been successfully published!',
+          url: '/'
+        });
+
         // Reset form and validation states
         form.reset();
         descriptionInput.classList.remove('invalid');
@@ -434,6 +458,81 @@ export default class HomePage {
     });
   }
 
+  async _subscribeUserToPush() {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.warn('Notification permission not granted');
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this._urlBase64ToUint8Array('BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk')
+      });
+      console.log('User is subscribed to push notifications:', subscription);
+
+      // Send subscription to server to save for push messages
+      const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(subscription)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to subscribe to push notifications on server');
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.message || 'Server error during push subscription');
+      }
+
+      console.log('Push subscription saved on server:', data);
+    } catch (error) {
+      console.error('Failed to subscribe user to push notifications:', error);
+    }
+  }
+
+  _urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  _sendPushNotification(payload) {
+    if (!('serviceWorker' in navigator)) {
+      console.warn('Service workers are not supported in this browser.');
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      console.warn('Notification permission not granted, cannot show notification.');
+      return;
+    }
+
+    navigator.serviceWorker.ready.then((registration) => {
+      registration.showNotification(payload.title, {
+        body: payload.body,
+        icon: 'images/logo.png',
+        badge: 'images/logo.png',
+        data: {
+          url: payload.url
+        }
+      });
+    });
+  }
+
+
   _setupCamera() {
     const startCameraBtn = document.getElementById('start-camera');
     const capturePhotoBtn = document.getElementById('capture-photo');
@@ -444,37 +543,41 @@ export default class HomePage {
     this._stopCamera();
 
     startCameraBtn.addEventListener('click', async () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          this.stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-              facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            } 
-          });
-          
-          cameraContainer.innerHTML = '';
-          const video = document.createElement('video');
-          video.srcObject = this.stream;
-          video.autoplay = true;
-          video.playsInline = true;
-          video.style.width = '100%';
-          video.style.borderRadius = '8px';
-          
-          await new Promise((resolve) => {
-            video.onloadedmetadata = resolve;
-          });
-          
-          cameraContainer.appendChild(video);
-          capturePhotoBtn.disabled = false;
-          startCameraBtn.textContent = 'Stop Camera';
-        } catch (error) {
-          console.error('Camera access error:', error);
-          cameraContainer.innerHTML = '<p class="error">Cannot access camera: ' + error.message + '</p>';
+      if (startCameraBtn.textContent === 'Start Camera') {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ 
+              video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              } 
+            });
+            
+            cameraContainer.innerHTML = '';
+            const video = document.createElement('video');
+            video.srcObject = this.stream;
+            video.autoplay = true;
+            video.playsInline = true;
+            video.style.width = '100%';
+            video.style.borderRadius = '8px';
+            
+            await new Promise((resolve) => {
+              video.onloadedmetadata = resolve;
+            });
+            
+            cameraContainer.appendChild(video);
+            capturePhotoBtn.disabled = false;
+            startCameraBtn.textContent = 'Stop Camera';
+          } catch (error) {
+            console.error('Camera access error:', error);
+            cameraContainer.innerHTML = '<p class="error">Cannot access camera: ' + error.message + '</p>';
+          }
+        } else {
+          cameraContainer.innerHTML = '<p class="error">Camera API not supported in this browser.</p>';
         }
       } else {
-        cameraContainer.innerHTML = '<p class="error">Camera API not supported in this browser.</p>';
+        this._stopCamera();
       }
     });
 
@@ -518,12 +621,25 @@ export default class HomePage {
 
   _stopCamera() {
     if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
+      this.stream.getTracks().forEach(track => {
+        if (track.readyState === 'live') {
+          track.stop();
+        }
+      });
       this.stream = null;
     }
-    document.getElementById('camera-container').innerHTML = '';
-    document.getElementById('capture-photo').disabled = true;
-    document.getElementById('start-camera').textContent = 'Start Camera';
+    const cameraContainer = document.getElementById('camera-container');
+    if (cameraContainer) {
+      cameraContainer.innerHTML = '';
+    }
+    const capturePhotoBtn = document.getElementById('capture-photo');
+    if (capturePhotoBtn) {
+      capturePhotoBtn.disabled = true;
+    }
+    const startCameraBtn = document.getElementById('start-camera');
+    if (startCameraBtn) {
+      startCameraBtn.textContent = 'Start Camera';
+    }
   }
 
   renderStories(stories) {
@@ -537,18 +653,28 @@ export default class HomePage {
       const item = document.createElement('article');
       item.setAttribute('role', 'listitem');
       item.setAttribute('tabindex', '0');
-      item.className = 'story-item';
+      item.className = 'story-item custom-story-card';
       item.innerHTML = `
-        <img src="${story.photoUrl}" alt="Photo from ${story.name}'s coding journey" loading="lazy" />
+        <img src="${story.photoUrl}" alt="Photo from ${story.name}'s coding journey" loading="lazy" class="story-image" />
         <div class="story-content">
-          <h2>${story.name}</h2>
-          <p>${story.description}</p>
+          <h2 class="story-name">${story.name}</h2>
+          <p class="story-description">${story.description}</p>
           <div class="story-meta">
-            Posted on ${new Date(story.createdAt).toLocaleDateString()}
+            Posted on <span class="story-date">${new Date(story.createdAt).toLocaleDateString()}</span>
           </div>
+          <button class="bookmark-btn" aria-label="Add bookmark" data-id="${story.id}">
+            <i class="fas fa-bookmark"></i> Bookmark
+          </button>
         </div>
       `;
       storyList.appendChild(item);
+
+      const bookmarkBtn = item.querySelector('.bookmark-btn');
+      bookmarkBtn.addEventListener('click', async () => {
+        await addBookmark(story);
+        bookmarkBtn.textContent = 'Bookmarked';
+        bookmarkBtn.disabled = true;
+      });
     });
 
     // Update the map with new stories
@@ -657,3 +783,4 @@ export default class HomePage {
     }
   }
 }
+
