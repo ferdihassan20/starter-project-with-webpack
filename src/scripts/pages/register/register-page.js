@@ -7,67 +7,74 @@ export default class RegisterPage {
 
   async render() {
     return `
-      <section class="auth-container" tabindex="0" aria-label="Registration form section">
-        <div class="auth-card">
-          <h1>Join Dicoding Story</h1>
-          <p class="auth-subtitle">Create your account and start sharing your coding journey</p>
+      <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="register-title">
+        <div class="modal-content">
+          <button class="modal-close" aria-label="Close registration form" id="close-register">
+            <i class="fas fa-times"></i>
+          </button>
           
-          <form id="register-form" aria-label="Registration form">
-            <div class="form-group">
-              <label for="name">Full Name</label>
-              <input 
-                type="text" 
-                id="name" 
-                name="name" 
-                required 
-                aria-required="true"
-                placeholder="Enter your full name"
-                autocomplete="name"
-              />
+          <div class="auth-container">
+            <div class="auth-card">
+              <h1 id="register-title">Create Account</h1>
+              <p class="auth-subtitle">Join our community today!</p>
+              
+              <form id="register-form" aria-label="Registration form">
+                <div class="form-group">
+                  <label for="name">Full Name</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required 
+                    aria-required="true"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    aria-required="true"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    aria-required="true"
+                    placeholder="At least 8 characters"
+                    autocomplete="new-password"
+                    minlength="8"
+                  />
+                  <small class="form-help">Password must be at least 8 characters long</small>
+                </div>
+
+                <button type="submit" class="auth-button">
+                  <span class="button-text">Create Account</span>
+                  <span class="button-loader" style="display: none;">Creating account...</span>
+                </button>
+              </form>
+
+              <div id="message" role="alert" aria-live="assertive"></div>
+
+              <div class="auth-links">
+                <p>Already have an account? <a href="#/login">Sign in here</a></p>
+              </div>
             </div>
-
-            <div class="form-group">
-              <label for="email">Email Address</label>
-              <input 
-                type="email" 
-                id="email" 
-                name="email" 
-                required 
-                aria-required="true"
-                placeholder="Enter your email"
-                autocomplete="email"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                name="password" 
-                required 
-                aria-required="true"
-                placeholder="At least 8 characters"
-                autocomplete="new-password"
-                minlength="8"
-              />
-              <small class="form-help">Password must be at least 8 characters long</small>
-            </div>
-
-            <button type="submit" class="auth-button">
-              <span class="button-text">Create Account</span>
-              <span class="button-loader" style="display: none;">Creating account...</span>
-            </button>
-          </form>
-
-          <div id="message" role="alert" aria-live="assertive"></div>
-
-          <div class="auth-links">
-            <p>Already have an account? <a href="#/login">Sign in here</a></p>
-            <p>Or <a href="#/guest-stories">browse stories as guest</a></p>
           </div>
         </div>
-      </section>
+      </div>
     `;
   }
 
@@ -80,6 +87,7 @@ export default class RegisterPage {
     }
 
     this._setupForm();
+    this._setupCloseButton();
   }
 
   _setupForm() {
@@ -141,5 +149,14 @@ export default class RegisterPage {
 
   _getStoredToken() {
     return localStorage.getItem('token');
+  }
+
+  _setupCloseButton() {
+    const closeButton = document.getElementById('close-register');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        window.location.hash = '#/';
+      });
+    }
   }
 }
