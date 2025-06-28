@@ -22,6 +22,11 @@
 
       .skip-link:focus {
         top: 0;
+        outline: 3px solid #007bff;
+      }
+
+      #main-content:focus {
+        outline: 3px solid #007bff;
       }
     </style>
 
@@ -35,14 +40,37 @@
   <body>
     <a href="#main-content" class="skip-link">Skip to content</a>
 
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#7B3FE4" />
+
+    <header id="app-header">
+      <!-- Navigation will be rendered here -->
+    </header>
+
     <main id="main-content" tabindex="-1">
       <!-- Content will be rendered here -->
     </main>
 
     <footer>
-      <p>&copy; 2024 Dicoding Story. All rights reserved.</p>
+      <div class="footer-content">
+        <p>&copy; 2024 Dicoding Story. All rights reserved.</p>
+      </div>
     </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(error => {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

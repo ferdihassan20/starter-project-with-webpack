@@ -1,0 +1,21 @@
+{
+  "name": "Dicoding Story App",
+  "short_name": "DicodingStory",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0F0024",
+  "theme_color": "#7B3FE4",
+  "description": "Share your coding journey stories with the Dicoding community",
+  "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
